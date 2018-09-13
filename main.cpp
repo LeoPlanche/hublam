@@ -45,16 +45,22 @@ int main(int, char * argv[]){
        queue<int> q = findhubs(g,k,r,s);
        /* find every laminar paths and put them in l*/
        queue<queue<int>> l = findlaminars(g,k,r,q);
-        /* generates a random graph of at most n nodes, depending on the average degree*/
+        /* colors the graph with the previously computed hub-laminar decomposition 
+         writes the result in DOT format with hubs in red and laminars in blue*/
+         squelette sq = simpleSquelette(g,q,r);
+         write_squelette(sq,":\\path\\mygraphcolored.dot");
+         /* fill the labels for each node in order to get a compact representation of distances*/
+         label lab = fillLabel(g,q,l,r);
+         
+         
+         /* generates a random graph of at most n nodes, depending on the average degree*/
         int n;
         g2 = randomGraph(40000);
         /* generates from a random graph a graph with an hub laminar decomposition*/
         int nbHubs, nbLams, maxL;
         tuple<graph,queue<int>,queue<queue<int>>,int> pair = randomHubLam(g2,k,r,nbHubs,nbLams,maxL);
-        /* colors the graph with the previously computed hub-laminar decomposition 
-         writes the result in DOT format with hubs in red and laminars in blue*/
-         squelette sq = simpleSquelette(g,q,r);
-         write_squelette(sq,":\\path\\mygraphcolored.dot");
+        /* writes the randomly generated hub-laminar graph*/
+        write_graph(get<0>(pair),"C:\\path\\myRandomGraph");     
 
 	return 0;
         }
