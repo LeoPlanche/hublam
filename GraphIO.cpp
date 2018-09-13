@@ -334,145 +334,9 @@ bool create_gephi_coloring(edges & e, const char * input, 			int nbCommunities, 
 	return true;
 }
 
-BFSTree clean_tree(BFSTree t, int k)
-{
-    
-    queue<int> qLast;
-    int n = t.n;
-    int start;
-    int last = n-1; 
-   // cout << "taille :" << t.status.size() << endl;
-   // cout << "n :" << n << endl;
-
-    for (int i =0 ; i<n ; i++)
-    {
-        t.status[i] = -1;
-    }
-  
-    while(last >= 0)
-    {
-       
-     while(last >=0 && t.status[last] != -1)   
-     {
-         last--;
-     }
-      if(last >= 0) {
-     queue<int> q;
-     int curr = last;
-     qLast.push(last);
-     while((t.status[curr]) != 1 && (curr>=0))
-     {
-         
-         q.push(curr);
-         t.status[curr] =1;
-         curr = t.pere[curr];     
-     }
-     if (curr==0 && t.status[0] == -1) {q.push(0);  t.status[0] =1;}
-     while(!q.empty())
-     {
-         start = q.front();
-         q.pop();     
-         elaguer1(k,start,&t);
-              
-            
-          }       
-        }
-    }
-    
-    while(!qLast.empty())
-    {
-       start = qLast.front();
-       qLast.pop();
-       createExtraLink(2*k+1, start, &t);      
-    }
-    
-   return t; 	   
-}
-
-
-
-BFSTree clean_treeV2(BFSTree t, int k)
-{
-    queue<int> qLast;
-    int n = t.n;
-    t.cycle =0;
-    int start;
-    int last = n-1; 
-   // cout << "taille :" << t.status.size() << endl;
-   // cout << "n :" << n << endl;
-
-    for (int i =0 ; i<n ; i++)
-    {
-        t.status[i] = -1;
-    }
-  
-    while(last >= 0)
-    {
-       
-     while(last >=0 && t.status[last] != -1)   
-     {
-         last--;
-     }
-      if(last >= 0) {
-     queue<int> q;
-     int curr = last;
-     qLast.push(last);
-     bool intoTheVoid = false;
-     while((t.status[curr]) != 1 && (curr>=0))
-     {
-         if(t.status[curr]==0 && (intoTheVoid  || valid(curr,&t) )) {
-             if(intoTheVoid)
-             {
-                curr = t.pere[curr];
-             }
-             else
-             {
-                intoTheVoid = true;
-                toClosest(k,curr,&t); 
-                q.push(curr);
-                t.status[curr] =1;
-                curr = t.pere[curr];  
-             
-             }
-         }
-         else
-         {
-         if(intoTheVoid)  {  
-         intoTheVoid = false;
-         toClosest(k,curr,&t);
-         t.cycle++;
-         }
-         q.push(curr);
-         t.status[curr] =1;
-         curr = t.pere[curr];  
-         }
-     }
-     if (curr==0 && t.status[0] == -1) {q.push(0);  t.status[0] =1;}
-     while(!q.empty())
-     {
-         start = q.front();
-         q.pop();     
-         elaguer1(k,start,&t);
-              
-            
-          }       
-        }
-    }
-    
-    while(!qLast.empty())
-    {
-       start = qLast.front();
-       qLast.pop();
-       createExtraLink(2*k+1, start, &t);    
-       //createExtraLink(k+1, start, &t); 
-    }
-    
-   return t; 	   
-}
 
 graph createRelique(squelette s)
 {
- //   cout << "ISSOU" << endl;
     int hub = -1;
     graph r;
     int curr=0;
@@ -504,7 +368,6 @@ graph createRelique(squelette s)
     
   }
     r.g.resize(r.n);
-  //  cout << "ISSOU" << endl;
 
     
     
@@ -579,8 +442,6 @@ graph createRelique(squelette s)
 	}
         
         return(compt==g.n);
-
-     
  }
 
 
@@ -590,22 +451,18 @@ bool isKLamiar(graph g, int k)
   for(int i = 0; i < g.n ; color[i++] = -1);
   pair<queue<int>,BFSTreeReel> bfs = stopBFS(make_pair(0,0),&g,color);
   bfs = stopBFS(make_pair(bfs.first.front(),bfs.first.front()),&g,color);
-  cout << "size of path : " << bfs.first.size() << endl;
    int close[g.n];
    int p;
    for(int i = 0; i < g.n ; close[i++] = -1);
   queue<int> q = bfs.first;
   
-  while(!q.empty()){
-        
-        
+  while(!q.empty()){            
     p = q.front();
     q.pop();
     colorPath(k, p, &g, close);
 	}
 
-  
-  
+
   for (int i=0; i < g.n ; i++)
   {
      if(close[i]== -1) 
@@ -644,28 +501,18 @@ colorPartialBFS(r,s,s,&g,color);
 pair<int,int> curr = uncolored(r+1,A,&g,color); 
 while(curr.first != -1 )  
 {
-   // cout << "d " << curr.second << endl;
-
- // cout << "hub courr " << curr.first << endl;
-    //cout << "curr hub = " << curr.first << " curr depart = " << curr.second << endl;
  pair<queue<int>,BFSTreeReel> bfs = stopBFS(curr,&g,color);
- 
-// cout << "bfs done"  << endl;
- if (bfs.first.size() <= r) //2*r+4*k+2 SI L GRAND
+  if (bfs.first.size() <= r) //2*r+4*k+2 SI L GRAND
  {
-  // cout << "small bfs of size " << bfs.first.size() << endl;
   colorBFS(bfs.second,curr.second,color);  
  }
  else{
      int p = hubMiddle(bfs.first,curr.first,&g,k,color);
-    // cout << "test hub middle done" << endl;
      if(p!=-1){
-        // cout << "hub mid " << p << endl;
          A.push(p);
          colorPartialBFS(r,p,p,&g,color);
  }
      else if( closeToA(bfs.first.front(),curr.first,k+1,&g,color) && bfs.first.size()>1){ //2k SI EXACT ET L GRAND
-      //  cout << "close to a" << endl;
          queue<int> path = bfs.first;
          for(int i= 0; i<path.size()-1;i++){
              path.pop();
@@ -676,20 +523,10 @@ while(curr.first != -1 )
      }     
      else if( !adjacentToA(bfs.first.front(),&g,color))
      {
-      //   cout << "hub dead end "<< bfs.first.front() << endl;
          A.push(bfs.first.front());
          colorPartialBFS(r,bfs.first.front(),bfs.first.front(),&g,color);
      }
      else{
-  //   cout << "laminar " << bfs.first.front() << endl;
-    /*
-         queue<int> l = bfs.first;
-        while(!l.empty())    {
-            cout << l.front() << endl;
-            l.pop();
-            
-        }
-         */
       int hub = 0; 
       for (std::vector<int>::iterator it = g.g[bfs.first.front()].begin(); it != g.g[bfs.first.front()].end();it++){
       if(color[*it] >= 0){
@@ -822,7 +659,6 @@ queue<queue<int>> findlaminars(graph g, int k, int r, queue<int> A) {
         if (!b) {
             if (!path.empty()) {
                 Q.push(path);
-                //cout << " debut path : " << path.front() << " fin path : " << path.back() << endl;
             }
             if(path.size()!=2)
             deletePath(k, path, &g, deletable, deleted);
@@ -952,7 +788,6 @@ void deletePath(int profondeur, queue<int> P, graph * g, bool * deletable,bool *
     if (deletable[p])
        deleted[p]=true;
     for (std::vector<int>::iterator it = g->g[p].begin(); it != g->g[p].end();it++){
-        // if(close[*it]==-1 && close[p]<profondeur)
         if(close[*it]==-1 && close[p]<profondeur && deletable[*it] && !deleted[*it])
         {       
             close[*it]=close[p]+1;
@@ -1032,14 +867,7 @@ queue<int> computePath(int start,queue<int> A,graph *g,bool* deleted, bool * del
                     {
                         stop =true;
                         last = *it;
-                        t.pere[last] = p;
-                        /*
-                        while(t.pere[last] != last)
-                        { 
-                            last = t.pere[last];
-                            if(deletable[last])
-                                stop = true;
-                        }     */                   
+                        t.pere[last] = p;                              
                         
                     }
                     else if(!deleted[*it] && t.pere[*it] ==-1)
@@ -1053,7 +881,6 @@ queue<int> computePath(int start,queue<int> A,graph *g,bool* deleted, bool * del
 	}
         if(!stop)
         {
-          //  cout << "no stop"<<endl;
             deleteBFS(t,start,deleted);
             return P;
         }
@@ -1061,12 +888,9 @@ queue<int> computePath(int start,queue<int> A,graph *g,bool* deleted, bool * del
         
         while(t.pere[last] != last)
         { 
-           // cout << last << " ";
             last = t.pere[last];
             P.push(last);          
         }
-      //  cout << endl;
-       // cout << P.front() << " et " << P.back() << endl; ;
     return P;
  }
 
@@ -1150,42 +974,11 @@ bool undeletedClose(int profondeur,int curr,graph *g,bool* deleted, int* close){
 }
 
 
-int trueUndeleted(int profondeur,queue<int> A,graph *g,bool* deleted)
-{
-  queue<int> q = A;
-  int close[g->n];  
-    while(!q.empty())
-    {
-        int s=q.front();
-        q.pop();
-       for(int i = 0; i < g->n ; close[i++] = -1);
-       if(undeletedTrueClose(profondeur,s,g,deleted,close))
-           return s; 
-    }
-  return -1;
-}
 
 /*
  Input : Un entier "profondeur", un sommet "curr"
  * Output : Un sommet Ã  distance "pronfondeur" de "curr", -1 si un tel sommet n'existe pas.
  */
-
-bool undeletedTrueClose(int profondeur,int curr,graph *g,bool* deleted, int* close){
-    close[curr]=profondeur;
-  if (profondeur ==0)      
-   return deleted[curr];
-  
-  
-  for (std::vector<int>::iterator it = g->g[curr].begin(); it != g->g[curr].end();it++){
-      if(close[*it]< profondeur){
-     if(undeletedTrueClose( profondeur-1,*it, g, deleted,close))
-         return true;
-     }
-  }
-    return false;    
-}
-
-
 
 
 
@@ -1209,25 +1002,8 @@ bool undeletedTrueClose(int profondeur,int curr,graph *g,bool* deleted, int* clo
   }
     return;
      
-     
-    
-   
 }
 
-  void deleteTruePartialBFS(int profondeur, int curr, graph *g, bool* deletable, int* close){
-  close[curr]=profondeur;
-  deletable[curr]=true;
-  if (profondeur == 0)
-      return;
-
-  for (std::vector<int>::iterator it = g->g[curr].begin(); it != g->g[curr].end();it++){
-            if(close[*it]<profondeur){
-     deleteTruePartialBFS(profondeur-1,*it,g,deletable,close);
-            }
-     }
-   
-    return;
-}
  /*
   * Input : Un sommet
   * Output : True si le sommet est adjacent Ã  un sommet coloriÃ© par un hub, False sinon
@@ -1327,6 +1103,11 @@ bool closeToA(int curr,int c,int profondeur ,graph* g, int* tabColor){
      
 }
 
+/*
+ Input : Une chmin, une couleur "color", un entier k
+ * Output : True si il existe un sommet de couleur diffÃ©rente de "color" Ã  distance k+1 du chemin et Ã  distance k+1
+ * d'un sommet Ã©loignÃ© de 3k d'une des extrÃ¨mitÃ©s du chemin.
+ */
 
 int hubMiddle(queue<int> P, int color, graph * g,int k, int* tabColor)
 {
@@ -1369,11 +1150,6 @@ int hubMiddle(queue<int> P, int color, graph * g,int k, int* tabColor)
      q.pop();
     }
     
-    /*
-   while(!q.empty()){     
-    close2[q.front()]=0;
-    q.pop();
-	}*/
     
     while(!q2.empty())
     {
@@ -1386,11 +1162,7 @@ int hubMiddle(queue<int> P, int color, graph * g,int k, int* tabColor)
          p=   q.front();
         for (std::vector<int>::iterator it = g->g[p].begin(); it != g->g[p].end();it++){
         if(close[*it]==-1 && tabColor[*it]!=color)     
-        {
-            //cout << "le sommet qui fait trigger : " << *it << "avec k " << k << " et q2.front " << q2.front() << " et close2 " <<
-            // close2[p] << endl;
-            return q2.front();
-        }
+            return q2.front();      
         if(close2[*it]==-1 && close2[p]<k)
         {
             close2[*it]=close2[p]+1;
@@ -1407,70 +1179,6 @@ int hubMiddle(queue<int> P, int color, graph * g,int k, int* tabColor)
     return -1;
 }
 
-/*
- Input : Une chmin, une couleur "color", un entier k
- * Output : True si il existe un sommet de couleur diffÃ©rente de "color" Ã  distance k+1 du chemin et Ã  distance k+1
- * d'un sommet Ã©loignÃ© de 3k d'une des extrÃ¨mitÃ©s du chemin.
- 
-int hubMiddle(queue<int> P, int color, graph * g,int k, int* tabColor)
-{
-    
-    int close[g->n];
-    int close2[g->n];
-    int p;
-    for(int i = 0; i < g->n ; close[i++] = -1);
-    queue<int> q = P;
-    
-    
-    while(!q.empty()){
-        
-        
-    p = q.front();
-    q.pop();
-    colorPath(k, p, g, close);
-	}
-    
-    q = P;
-    int profondeur = 0;
-    for(int i = 0; i < g->n ; close2[i++] = -1);
-     while(!q.empty()){
-    int p = q.front();
-    q.pop();
-    if((profondeur>3*k) && (profondeur <= P.size()-3*k))
-    {
-        if(searchCandidate(k+1,color,p,g,close,close2,tabColor))
-        return p;
-    }
-    profondeur++;
-    }
-    return -1;
-}
-  */
-
-/*
- * Input : Une couleur "color", un sommet "curr", deux ensembles de couleurs
- Output : Renvoit true si il existe un sommet Ã  distance k+1 de "curr" d'une couleur diffÃ©rente de "color"
- * et tel que sa couleur dans "close" soit "-1".
- * Les sommets Ã  distance moins de k du chemin de "hubinthemidlle" ayant une couleur dans "close" de 1.
- */
-
-bool searchCandidate(int k,int color,int curr,graph * g,int* close,int* close2, int* tabColor){
-    close2[curr]=k;
-    if(k==0)
-    {
-        return (tabColor[curr]!=color && close[curr]==-1);      
-    }
-    
-     for (std::vector<int>::iterator it = g->g[curr].begin(); it != g->g[curr].end();it++){
-         
-      if(close2[*it] < k){
-      if(searchCandidate( k-1,color,*it, g,close,close2,tabColor))  
-         return true;
-     }
-  }
-    return false;
-    
-}
 
 /*Input : Un arbre BFS
  * Output : Les sommets de l'arbre non coloriÃ©s ont maintenant la couleur "-2" (Ã©quivalent de "lam")
@@ -1647,31 +1355,7 @@ Output :  si il existe un sommet non coloriÃ© Ã  distance profondeur+1 d'un 
     }
   return make_pair(-1,-1);
 }
- /*
-pair<int,int> uncolored(int profondeur,queue<int> A,graph *g,int* tabCol)
-{
 
-  queue<int> q = A;
-
- int close[g->n];  
- 
-
-  for(int i = 0; i < g->n ; close[i++] = -1);
-  
-
-    while(!q.empty())
-    {
-        int s=q.front();
-        q.pop();
-        int d = uncoloredClose(profondeur,s,g,tabCol,close);
-       if(d!= -1)
-           return make_pair(s,d);                
-       for(int i = 0; i < g->n ; close[i++] = -1);
-    }
-  return make_pair(-1,-1);
-}
-   */
-  
 /*
  * Input : Une profondeur et un sommet "curr"
  * Output : Un sommet non coloriÃ© Ã  distance profondeur+1 de "curr",
@@ -1696,117 +1380,7 @@ int uncoloredClose(int profondeur,int curr,graph *g,int* tabCol,int* close){
     
 }
 
-
-
-
-
-
-squelette algoReel(graph g, int k, int r)
-{
-    BFSTreeReel t = BFS_tree_reel(g,0);     
-    squelette s;
-    s.n=g.n;
-    s.m =g.m;
-    s.g = g.g;
-       
-    int n = s.n;
-    int color = 0;
-    int start;
-    int last =-1;
-
-    for (int i =0 ; i<n ; i++)
-    {
-      s.closest.push_back(n+1);
-      s.father.push_back(-1);
-      s.color.push_back(-1);
-      s.hub.push_back(-1);   
-      s.bfs.push_back(-1);
-    }
-    
-    
-    
-    
-    
-    
-    last = deepestUncolored(&s,&t);
-    while(last>=0)
-    {
-    color++;
-   
-      if(last >= 0) {
-     queue<int> q;
-     int curr = last;
-     s.qLast.push(last);
-     while(s.color[curr] == -1 && (curr>=0))
-     {
-         q.push(curr);
-         s.color[curr] = color;
-         s.closest[curr] =0;
-         s.father[curr] = curr;
-       //  if(s.color[t.pere[curr]]==-1){
-         s.bfs[curr] = t.pere[curr]; 
-       //  }
-         curr = t.pere[curr];     
-     }
-     
-     if (curr==0 && s.color[0] == -1) {q.push(0);  s.color[0] = color;}
-     
-     while(!q.empty())
-     {
-         start = q.front();
-         q.pop();     
-         elaguerReel(k,0,color,start,start,&s);             
-          }     
-     
-    }
-        last = deepestUncolored(&s,&t);
-    }
-    
-    
-    
-    
-
-    for (int i = 0; i< s.n ; i++){
-          for (std::vector<int>::iterator it = s.g[i].begin(); it != s.g[i].end();it++){
-              if(s.color[i]!=s.color[*it] ) {
-               //   if(!hubClose(r,i,&s)){
-                  if(s.hub[i]==-1){
-                      s.hub[i]=i;
-                     fillHub(i,k,r,&s);
-                  }
-                // }                
-              }                            
-          }
-              
-    }
-    
-    
-    
-    
-    for (int i = 0; i< s.n ; i++){
-          for (std::vector<int>::iterator it = s.g[i].begin(); it != s.g[i].end();it++){
-              if(s.hub[i]!=-1 && s.hub[*it] !=-1) {
-                  if(s.hub[i] != s.hub[*it]) {
-                     fusionHub(s.hub[i],s.hub[*it],&s);                
-                  }                
-              }                            
-          }
-              
-    }
   
- 
-   
-    
-   return s; 	   
-}
-
-void fusionHub(int h,int l,squelette *s ){
-    for (int i = 0; i< s->n ; i++){
-        if(s->hub[i]==l){
-           s->hub[i]=h;
-        }
-    }  
-}            
 
 
 
@@ -1873,28 +1447,6 @@ int deepestUncolored(squelette *s, BFSTreeReel *t){
 }
 
 
-void elaguerReel(int k, int profondeur, int color, int curr, int start, squelette *s){
-    if (k ==0){
-       if (profondeur < s->closest[curr]){
-       s->color[curr]=color;
-       s->closest[curr]=profondeur;
-       s->father[curr]=start;
-       }
-            return ;
-    }
-   
-  for (std::vector<int>::iterator it = s->g[curr].begin(); it != s->g[curr].end();it++){
-      if (profondeur < s->closest[*it]){
-       s->color[*it]=color;
-       s->closest[*it]=profondeur;
-       s->father[*it]=start;
-       } 
-     elaguerReel(k-1,profondeur+1,color,*it,start,s);
-     }
-    
-}
-
-
 bool hubClose(int r, int i ,squelette * s){
 
         BFSTreeReel t;
@@ -1933,199 +1485,7 @@ bool hubClose(int r, int i ,squelette * s){
  }
 
 
-bool valid(int source, BFSTree * t)
-{
-    int curr = source;
-         while((t->status[curr] != 1) && (t->pere[curr] != curr))
-         {
-             if (t->status[curr] == -1)  
-                 return true;
-             curr = t->pere[curr];
-         }
-    return false;
-    
-    
-}
 
-void toClosest(int k, int start, BFSTree * t)
-{
-         int n = t->n;
-        int x,a;
-        int par[n];
-  	for(int i=0; i<n; ++i) {
-            par[i] = -1;
-        }
-
-	
-	queue<int> q;
-	q.push(start);
-	par[start] = start;
-	while(!q.empty()){
-		x = q.front();
-                if(t->status[x] == 1)
-                {
-                    if (!son(k,x,start,t))
-                    {
-                        t->extraLink.push_back(make_pair(start,x));
-                        t->voisins[start].push_back(make_pair(x,1));
-                        t->voisins[x].push_back(make_pair(start,1));
-                        
-                    return ;
-                    }
-                }
-		q.pop();
-		for(int j = 0; j < t->voisins[x].size(); j++){
-                    a = t->voisins[x][j].first;
-			if(par[a] == -1){
-				par[a] = x;
-				q.push(a);
-                        }
-		}
-		
-	}
-    
-}
-
-bool son(int k,int start ,int goal ,BFSTree * t)
-{
-    int i = 0;
-    int curr = start;
-    while(t->pere[curr] != curr && i<=k)
-    {
-        if (curr == goal)
-            return true;
-        else
-            curr = t->pere[curr];
-        
-        
-    }
-    return false;
-}
-
-bool createExtraLink(int k, int start, BFSTree * t)
-{
-        int n = t->n;
-        int x,a;
-        int par[n];
-        int select[n];
-  	for(int i=0; i<n; ++i) {
-            par[i] = -1;
-            select[i] = -1;
-        }
-	vector<int> dis(n,0);
-
-	
-	queue<int> q;
-	q.push(start);
-	par[start] = start;
-	while(!q.empty()){
-		x = q.front();
-                if(t->status[x] == 1)
-                    select[x]=1;
-		q.pop();
-                if(dis[x]<=k){
-		for(int j = 0; j < t->voisins[x].size(); j++){
-                    a = t->voisins[x][j].first;
-			if(par[a] == -1){
-				par[a] = x;
-				dis[a] = dis[x] + 1;
-				q.push(a);
-                        }
-		}
-		}
-	}
-        for(int i=0; i<n; ++i) {
-            par[i] = -1;
-            dis[i] = 0;
-        }
-        q.push(start);
-	par[start] = start;
-	while(!q.empty()){
-		x = q.front();
-                if(t->status[x] == 1)
-                    select[x]=-1;
-		q.pop();
-                if(dis[x]<=k*2){
-		for(int j = 0; j < t->voisins[x].size(); j++){
-                    a = t->voisins[x][j].first;
-			if((par[a] == -1) && (t->voisins[x][j].second == 1)){
-				par[a] = x;
-				dis[a] = dis[x] + 1;
-				q.push(a);
-                        }
-		}
-		}
-	}
-        
-     for(int i = 1; i<n ; i++)
-     {
-         if(select[i]==1){
-           t->extraLink.push_back(make_pair(start,i));
-           t->voisins[start].push_back(make_pair(i,1));
-           t->voisins[i].push_back(make_pair(start,1));
-           t->cycle ++;
-           return true;
-         }
-     }
-	
-   return false; 
-}
-
-
-void elaguer1(int k,  int start, BFSTree *t){
-        int n = t->n;
-        int x,a;
-        int par[n];
-  	for(int i=0; i<n; ++i) {
-            par[i] = -1;
-        }
-	vector<int> dis(n,0);
-
-	
-	queue<int> q;
-	q.push(start);
-	par[start] = start;
-	while(!q.empty()){
-		x = q.front();             
-		q.pop();
-                if(dis[x]<k){
-		for(int j = 0; j < t->voisins[x].size(); j++){
-                    a = t->voisins[x][j].first;
-			if(par[a] == -1){
-                            if(t->status[a]==-1)
-                                t->status[a]=0;
-				par[a] = x;
-				dis[a] = dis[x] + 1;
-				q.push(a);
-                        }
-		}
-	}
-	
-    }
-   
-    
-}
-
-
-void elaguer(int k,  int start, BFSTree *t){
-    if (k ==0){
-        
-       t->status[start]=0;
-            return ;
-    }
-    bool b = true;
-   
-  for (std::deque<int>::iterator it = t->fils[start].begin(); it != t->fils[start].end();it++){
-     elaguer(k-1,*it,t);
-     if(t->status[*it]!=0)
-         b =false;
-     }
-  
-    if(b){
-       t->status[start]=0;
-    }
-    
-}
 
 void create_graph_from_tree(graph & g, BFSTree t)
 {
@@ -2605,19 +1965,11 @@ queue<int>  makePath(rdmgraph * g,pair<int,int> curr,int * select)
                         stop = true;
                     }
                     else if(t.pere[*it] ==-1 && select[*it]!=-2){
-                       /* bool good = true;
-                        for(vector<int>::iterator it2 = g->g[*it].begin(); it2 != g->g[*it].end() && !stop; ++it2){
-                            if(select[*it2]==-2)
-                                good=false;
-                        }*/
-                      //  if(good){
+                       
 				t.pere[*it] = p;
                                 t.profondeur[*it]=t.profondeur[p]+1;                             
                                 t.fils[p].push_back(*it);                                                            
-				q.push(*it);
-                     //   }
-                       
-                       
+				q.push(*it);                                          
                     }
 		}
 	}
