@@ -7,7 +7,6 @@
 //TODO only debug /clean up
 #include <iostream>
 #include <cassert>
-#include "test.hpp"
 
 /*template <typename T> class edge::edge(T data) : data(data){}
 

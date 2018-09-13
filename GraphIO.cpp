@@ -18,6 +18,7 @@
 
 using namespace std;
 
+
 bool read_graph(graph & g,const char * input){
 	ifstream is(input);
 	if(!is.is_open()){
